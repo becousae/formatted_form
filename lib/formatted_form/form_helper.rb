@@ -3,7 +3,10 @@ module FormattedForm
   include ActionView::Helpers::FormHelper
 
   def f_form_for(*args, &block)
-    form_for(*args, &block)
+    options = args.extract_options!
+    options[:builder] = FormattedForm::FormBuilder
+    options[:html] = { class: "formatted_form" }
+    form_for(*args << options, &block)
   end
 
   def url_for(*args)
