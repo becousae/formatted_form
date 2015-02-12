@@ -13,13 +13,9 @@ require 'action_view/test_case'
 # Load support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
+# ActionView::RoutingUrlFor.send(:include, ActionDispatch::Routing::UrlFor)
+
 # Load fixtures from the engine
 if ActiveSupport::TestCase.respond_to?(:fixture_path=)
   ActiveSupport::TestCase.fixture_path = File.expand_path("../fixtures", __FILE__)
-end
-
-class ActionView::TestCase
-  def users_path(*args)
-    '/users/'
-  end
 end
