@@ -1,8 +1,14 @@
 module FormattedForm
   class FormBuilder < ActionView::Helpers::FormBuilder
+    include ActionView::Helpers::NumberHelper
+
     delegate :content_tag, to: :@template
 
-    FIELD_HELPERS = %w[text_field]
+    def initialize(object_name, object, template, options)
+      super
+    end
+
+    FIELD_HELPERS = %w[text_field number_field file_field password_field]
 
     FIELD_HELPERS.each do |method_name|
       with_method_name    = "#{method_name}_with_format"
@@ -17,6 +23,22 @@ module FormattedForm
       alias_method_chain method_name, :format
     end
 
+    def price_field(name, options = {})
+      options[:min] ||= 0
+
+      if object.is_a?(ActiveRecord::Base)
+        options[:value] ||= object[name]
+      elsif object.respond_to?(name)
+        options[:value] ||= object.send name
+      end
+      options[:value] = number_with_precision(options[:value], precision: 2)
+
+      number_field(name, options)
+    end
+
+    # def check_box_with_format(name, options = {}, checked_value = '1', unchecked_value = '0', &block)
+
+    # end
 
     def form_group(*args, &block)
       options = args.extract_options!
@@ -49,7 +71,8 @@ module FormattedForm
       end
 
       unless options.delete(:skip_label)
-        form_group_options[:label] = { class: label_class }
+        form_group_options[:label] = { }
+        form_group_options[:label][:class] = label_class unless label_class.empty?
 
         if label_options.is_a? Hash
           form_group_options[:label].merge!(label_options) { |key, v1, v2| v1 << v2 }

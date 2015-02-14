@@ -1,3 +1,4 @@
- <%= f_form_for :user do |f| %>
-   <%= f.text_field :name, skip_label: true, value: "" %>
+<% u = Post.new(cost: 30) %>
+ <%= f_form_for u, url: 'example.com' do |f| %>
+   <%= f.price_field :cost %>
 <% end %>
