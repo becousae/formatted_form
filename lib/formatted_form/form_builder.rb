@@ -36,20 +36,19 @@ module FormattedForm
       number_field(name, options)
     end
 
-    # def check_box_with_format(name, options = {}, checked_value = '1', unchecked_value = '0', &block)
+    def check_box_with_format(name, options = {}, checked_value = '1', unchecked_value = '0')
+      options.symbolize_keys!
 
-    # end
+      # form_group_builder(name, options) do
+        check_box_without_format(name, options, checked_value, unchecked_value)
+      # end
+    end
 
-    def form_group(*args, &block)
-      options = args.extract_options!
-      name = args.first
+    alias_method_chain :check_box, :format
 
+    def form_group(method, options, &block)
       content_tag(:div, options.except(:label)) do
-        if options[:label]
-          g_label(name, options[:label]) + yield
-        else
-          yield
-        end
+        yield
       end
     end
 
@@ -80,7 +79,11 @@ module FormattedForm
       end
 
       form_group(method, form_group_options) do
-        yield
+        if form_group_options[:label]
+          g_label(method, form_group_options[:label]) + yield
+        else
+          yield
+        end
       end
     end
 
