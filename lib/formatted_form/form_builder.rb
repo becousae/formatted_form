@@ -14,9 +14,16 @@ module FormattedForm
       with_method_name    = "#{method_name}_with_format"
       without_method_name = "#{method_name}_without_format"
 
+
       define_method(with_method_name) do |name, options = {}|
-        form_group_builder(name, options) do
-          send(without_method_name, name, options)
+        form_group_options = extract_form_group_options(options)
+
+        form_group(form_group_options) do
+          if form_group_options[:label]
+            g_label(name, form_group_options[:label]) + send(without_method_name, name, options)
+          else
+            send(without_method_name, name, options)
+          end
         end
       end
 
@@ -37,22 +44,28 @@ module FormattedForm
     end
 
     def check_box_with_format(name, options = {}, checked_value = '1', unchecked_value = '0')
-      options.symbolize_keys!
+      form_group_options = extract_form_group_options(options)
 
-      # form_group_builder(name, options) do
-        check_box_without_format(name, options, checked_value, unchecked_value)
-      # end
+      form_group(form_group_options) do
+        if form_group_options[:label]
+          check_box_without_format(name, options, checked_value, unchecked_value) + g_label(name, form_group_options[:label])
+        else
+          check_box_without_format(name, options, checked_value, unchecked_value)
+        end
+      end
     end
 
     alias_method_chain :check_box, :format
 
-    def form_group(method, options, &block)
+    def form_group(options, &block)
       content_tag(:div, options.except(:label)) do
         yield
       end
     end
 
-    def form_group_builder(method, options, html_options = nil)
+    private
+
+    def extract_form_group_options(options = {}, html_options = nil)
       options.symbolize_keys!
 
       css_options = html_options || options
@@ -78,19 +91,10 @@ module FormattedForm
         end
       end
 
-      form_group(method, form_group_options) do
-        if form_group_options[:label]
-          g_label(method, form_group_options[:label]) + yield
-        else
-          yield
-        end
-      end
+      form_group_options
     end
 
-    private
-
-    def g_label(name, options)
-      options ||= {}
+    def g_label(name, options = {})
       label(name, options[:text] || name, options.except(:text))
     end
   end

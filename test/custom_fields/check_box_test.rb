@@ -18,4 +18,19 @@ class CheckBoxTest < ActionView::TestCase
     assert_select 'input#user_admin[type="checkbox"][value="no"]'
     assert_select 'input[name="user[admin]"][type="hidden"][value="yes"]'
   end
+
+  test 'generates wrapper' do
+    concat_form_for_check_box_field(:user, :admin, wrapper_class: 'wrapper')
+    assert_select 'form > div.wrapper > input#user_admin'
+  end
+
+  test 'generates label' do
+    concat_form_for_check_box_field(:user, :admin)
+    assert_select 'form > div > input[type="checkbox"] + label[for="user_admin"]'
+  end
+
+  test 'doesn\'t generate label when :skip_label is provided' do
+    concat_form_for_check_box_field(:user, :admin, skip_label: true)
+    assert_select 'form label', false
+  end
 end
