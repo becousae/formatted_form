@@ -19,11 +19,9 @@ module FormattedForm
         form_group_options = extract_form_group_options(options)
 
         form_group(form_group_options) do
-          if form_group_options[:label]
-            g_label(name, form_group_options[:label]) + send(without_method_name, name, options)
-          else
-            send(without_method_name, name, options)
-          end
+          block = ActiveSupport::SafeBuffer.new
+          block << g_label(name, form_group_options[:label]) if form_group_options[:label]
+          block << send(without_method_name, name, options)
         end
       end
 
@@ -47,11 +45,9 @@ module FormattedForm
       form_group_options = extract_form_group_options(options)
 
       form_group(form_group_options) do
-        if form_group_options[:label]
-          check_box_without_format(name, options, checked_value, unchecked_value) + g_label(name, form_group_options[:label])
-        else
-          check_box_without_format(name, options, checked_value, unchecked_value)
-        end
+        block = ActiveSupport::SafeBuffer.new
+        block << check_box_without_format(name, options, checked_value, unchecked_value)
+        block << g_label(name, form_group_options[:label]) if form_group_options[:label]
       end
     end
 
@@ -78,17 +74,13 @@ module FormattedForm
       form_group_options = {}
       form_group_options[:class] = wrapper_class unless wrapper_class.empty?
 
-      if wrapper_options.is_a? Hash
-        form_group_options.merge!(wrapper_options) { |key, v1, v2| v1 << v2 }
-      end
+      merge_options(form_group_options, wrapper_options)
 
       unless options.delete(:skip_label)
         form_group_options[:label] = { }
         form_group_options[:label][:class] = label_class unless label_class.empty?
 
-        if label_options.is_a? Hash
-          form_group_options[:label].merge!(label_options) { |key, v1, v2| v1 << v2 }
-        end
+        merge_options(form_group_options[:label], label_options)
       end
 
       form_group_options
@@ -96,6 +88,12 @@ module FormattedForm
 
     def g_label(name, options = {})
       label(name, options[:text] || name, options.except(:text))
+    end
+
+    def merge_options(h1, h2)
+      if h2.is_a? Hash
+        h1.merge!(h2) { |key, v1, v2| v1 << v2 }
+      end
     end
   end
 end
