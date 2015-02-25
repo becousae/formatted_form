@@ -53,6 +53,18 @@ module FormattedForm
 
     alias_method_chain :check_box, :format
 
+    def date_select_with_format(name, options = {}, html_options = {})
+      form_group_options = extract_form_group_options(html_options)
+
+      form_group(form_group_options) do
+        block = ActiveSupport::SafeBuffer.new
+        block << g_label(name, form_group_options[:label]) if form_group_options[:label]
+        block << date_select_without_format(name, options, html_options)
+      end
+    end
+
+    alias_method_chain :date_select, :format
+
     def form_group(options, &block)
       content_tag(:div, options.except(:label)) do
         yield
