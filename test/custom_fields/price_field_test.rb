@@ -13,7 +13,7 @@ class PriceFieldTest < ActionView::TestCase
   end
 
   test 'generates wrapper' do
-    concat_form_for_price_field(:user, :price, wrapper_class: 'wrapper')
+    concat_form_for_price_field(:user, :price, wrapper: { class: 'wrapper' })
     assert_select 'form > div.wrapper > input#user_price'
   end
 

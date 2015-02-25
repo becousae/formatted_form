@@ -78,9 +78,9 @@ module FormattedForm
 
       css_options = html_options || options
 
-      wrapper_class = [FormattedForm.default_wrapper_class, css_options.delete(:wrapper_class)].compact
+      wrapper_class = [FormattedForm.default_wrapper_class].compact
       wrapper_options = css_options.delete(:wrapper)
-      label_class = [FormattedForm.default_label_class, css_options.delete(:label_class)].compact
+      label_class = [FormattedForm.default_label_class].compact
       label_options = css_options.delete(:label)
 
       form_group_options = {}

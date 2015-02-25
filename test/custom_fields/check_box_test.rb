@@ -20,7 +20,7 @@ class CheckBoxTest < ActionView::TestCase
   end
 
   test 'generates wrapper' do
-    concat_form_for_check_box_field(:user, :admin, wrapper_class: 'wrapper')
+    concat_form_for_check_box_field(:user, :admin, wrapper: { class: 'wrapper' })
     assert_select 'form > div.wrapper > input#user_admin'
   end
 

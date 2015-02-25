@@ -1,3 +1,3 @@
  <%= f_form_for :user do |f| %>
-   <%= f.date_select :birth, {}, { skip_label: true, label_class: "class" } %>
+   <%= f.date_select :birth, {}, { wrapper_class: "wrapper1", wrapper: { class: "wrapper2" } } %>
 <% end %>
