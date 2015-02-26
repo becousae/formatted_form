@@ -2,15 +2,16 @@ module FormattedForm
   class FormBuilder < ActionView::Helpers::FormBuilder
     include ActionView::Helpers::NumberHelper
 
+    FIELD_HELPERS_WITHOUT_HTML_OPTIONS = %w[text_field number_field file_field password_field]
+    FIELD_HELPERS_WITH_HTML_OPTIONS = %w[date_select datetime_select]
+
     delegate :content_tag, to: :@template
 
     def initialize(object_name, object, template, options)
       super
     end
 
-    FIELD_HELPERS = %w[text_field number_field file_field password_field]
-
-    FIELD_HELPERS.each do |method_name|
+    FIELD_HELPERS_WITHOUT_HTML_OPTIONS.each do |method_name|
       with_method_name    = "#{method_name}_with_format"
       without_method_name = "#{method_name}_without_format"
 
@@ -22,6 +23,24 @@ module FormattedForm
           block = ActiveSupport::SafeBuffer.new
           block << g_label(name, form_group_options[:label]) if form_group_options[:label]
           block << send(without_method_name, name, options)
+        end
+      end
+
+      alias_method_chain method_name, :format
+    end
+
+    FIELD_HELPERS_WITH_HTML_OPTIONS.each do |method_name|
+      with_method_name    = "#{method_name}_with_format"
+      without_method_name = "#{method_name}_without_format"
+
+
+      define_method(with_method_name) do |name, options = {}, html_options = {}|
+        form_group_options = extract_form_group_options(html_options)
+
+        form_group(form_group_options) do
+          block = ActiveSupport::SafeBuffer.new
+          block << g_label(name, form_group_options[:label]) if form_group_options[:label]
+          block << send(without_method_name, name, options, html_options)
         end
       end
 
@@ -53,25 +72,29 @@ module FormattedForm
 
     alias_method_chain :check_box, :format
 
-    def date_select_with_format(name, options = {}, html_options = {})
-      form_group_options = extract_form_group_options(html_options)
+    def radio_button_with_format(name, tag_value, options = {})
+      form_group_options = extract_form_group_options(options)
 
       form_group(form_group_options) do
         block = ActiveSupport::SafeBuffer.new
-        block << g_label(name, form_group_options[:label]) if form_group_options[:label]
-        block << date_select_without_format(name, options, html_options)
+        block << radio_button_without_format(name, tag_value, options)
+        if form_group_options[:label]
+          form_group_options[:label][:text] ||= tag_value
+          form_group_options[:label][:value] = tag_value
+          block << g_label(name, form_group_options[:label])
+        end
       end
     end
 
-    alias_method_chain :date_select, :format
+    alias_method_chain :radio_button, :format
+
+    private
 
     def form_group(options, &block)
       content_tag(:div, options.except(:label)) do
         yield
       end
     end
-
-    private
 
     def extract_form_group_options(options = {}, html_options = nil)
       options.symbolize_keys!
