@@ -88,6 +88,18 @@ module FormattedForm
 
     alias_method_chain :radio_button, :format
 
+    def select_with_format(name, choices = nil, options = {}, html_options = {}, &optionsblock)
+      form_group_options = extract_form_group_options(html_options)
+
+      form_group(form_group_options) do
+        block = ActiveSupport::SafeBuffer.new
+        block << g_label(name, form_group_options[:label]) if form_group_options[:label]
+        block << select_without_format(name, choices, options, html_options, &optionsblock)
+      end
+    end
+
+    alias_method_chain :select, :format
+
     private
 
     def form_group(options, &block)

@@ -1,26 +1,30 @@
 require 'test_helper'
 
 class WrapperTest < ActionView::TestCase
-  test 'generates wrapper div by default' do
-    concat_form_for :user do |f|
-      f.text_field :name
-    end
-    assert_select 'form > div > input#user_name'
-  end
+  include FormGenerators
 
-  test 'add default wrapper class' do
-    FormattedForm.default_wrapper_class = 'wrapper_class'
-    concat_form_for :user do |f|
-      f.text_field :name
+  WRAPPERS_TO_TEST.each do |input|
+    test "#{input} generates wrapper div by default" do
+      send "concat_form_for_#{input}", :user, :name
+      assert_select 'form > div'
     end
-    assert_select 'form > div.wrapper_class > input#user_name'
-  end
 
-  test 'passes options from :wrapper to div.wrapper' do
-    concat_form_for :user do |f|
-      f.text_field :name, wrapper: { class: 'wrapper_class', id: 'wrapper_id' }
+    test "#{input} add default wrapper class" do
+      FormattedForm.default_wrapper_class = 'wrapper_class'
+      send "concat_form_for_#{input}", :user, :name
+      assert_select 'form > div.wrapper_class'
     end
-    assert_select 'form > div.wrapper_class > input#user_name'
-    assert_select 'form > div#wrapper_id > input#user_name'
+
+    test "#{input} passes options from :wrapper to div.wrapper" do
+      send "concat_form_for_#{input}", :user, :name, wrapper: { class: 'wrapper_class', id: 'wrapper_id' }
+      assert_select 'form > div.wrapper_class'
+      assert_select 'form > div#wrapper_id'
+    end
+
+    test "#{input} doesn't overwrite default wrapper class with new classes" do
+      FormattedForm.default_wrapper_class = 'def_wrapper_class'
+      send "concat_form_for_#{input}", :user, :name, wrapper: { class: 'wrapper_class' }
+      assert_select 'form > div.def_wrapper_class.wrapper_class'
+    end
   end
 end

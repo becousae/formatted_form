@@ -1,20 +1,11 @@
 require 'test_helper'
 
 class PriceFieldTest < ActionView::TestCase
-  def concat_form_for_price_field(object, attribute, *args)
-    concat_form_for(object) do |f|
-      f.price_field attribute, *args
-    end
-  end
+  include FormGenerators
 
   test 'should be a number_field input' do
     concat_form_for_price_field(:user, :price)
     assert_select 'form input[type="number"]'
-  end
-
-  test 'generates wrapper' do
-    concat_form_for_price_field(:user, :price, wrapper: { class: 'wrapper' })
-    assert_select 'form > div.wrapper > input#user_price'
   end
 
   test 'has minimum set by default' do

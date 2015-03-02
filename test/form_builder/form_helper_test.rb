@@ -13,7 +13,7 @@ class FormHelperTest < ActionView::TestCase
 
   test 'FormattedForm adds default class to form' do
     swap FormattedForm, default_form_class: 'formatted_form' do
-      concat_form_for(:user)
+      concat_form_for(:user) do |f| end
       assert_select 'form.formatted_form'
     end
   end
